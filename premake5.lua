@@ -10,7 +10,7 @@ project "yaml-cpp"
     files
     {
         "src/**.h",
-        "src/**.cpp"
+        "src/**.cpp",
 
         "include/**.h"
     }
