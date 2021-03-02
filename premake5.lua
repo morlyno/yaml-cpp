@@ -14,6 +14,11 @@ project "yaml-cpp"
 
         "include/**.h"
     }
+
+	includedirs
+	{
+		"include"
+	}
     
 	filter "system:windows"
         systemversion "latest"
