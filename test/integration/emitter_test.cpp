@@ -382,6 +382,20 @@ TEST_F(EmitterTest, ScalarFormat) {
       "crazy\tsymbols that we like");
 }
 
+TEST_F(EmitterTest, LiteralWithoutTrailingSpaces) {
+  out << YAML::BeginMap;
+  out << YAML::Key << "key";
+  out << YAML::Value << YAML::Literal;
+  out << "expect that with two newlines\n\n"
+         "no spaces are emitted in the empty line";
+  out << YAML::EndMap;
+
+  ExpectEmit(
+      "key: |\n"
+      "  expect that with two newlines\n\n"
+      "  no spaces are emitted in the empty line");
+}
+
 TEST_F(EmitterTest, AutoLongKeyScalar) {
   out << BeginMap;
   out << Key << Literal << "multi-line\nscalar";
@@ -952,6 +966,14 @@ TEST_F(EmitterTest, UserType) {
   out << EndSeq;
 
   ExpectEmit("- x: 5\n  bar: hello\n- x: 3\n  bar: goodbye");
+}
+
+TEST_F(EmitterTest, UserType2) {
+  out << BeginSeq;
+  out << Foo(5, "\r");
+  out << EndSeq;
+
+  ExpectEmit("- x: 5\n  bar: \"\\r\"");
 }
 
 TEST_F(EmitterTest, UserTypeInContainer) {
@@ -1602,6 +1624,15 @@ NodeB:
   k: [*k0, *k1])");
 }
 
+TEST_F(EmitterTest, AnchorEncoding) {
+  Node node;
+  node["--- &$ [*$]1"] = 1;
+  out << node;
+  ExpectEmit("\"--- &$ [*$]1\": 1");
+  Node reparsed = YAML::Load(out.c_str());
+  EXPECT_EQ(reparsed["--- &$ [*$]1"].as<int>(), 1);
+}
+
 class EmitterErrorTest : public ::testing::Test {
  protected:
   void ExpectEmitError(const std::string& expectedError) {
@@ -1672,5 +1703,6 @@ TEST_F(EmitterErrorTest, InvalidAlias) {
 
   ExpectEmitError(ErrorMsg::INVALID_ALIAS);
 }
+
 }  // namespace
 }  // namespace YAML
